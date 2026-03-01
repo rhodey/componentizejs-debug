@@ -1,51 +1,54 @@
-# Lock.host-wasm-rust
-Lock.host WASM Rust example, see [Lock.host](https://github.com/rhodey/lock.host)
+# Lock.host-wasm-rust (!!debug)
+ComponentizeJS is failing when:
 
-This demonstration uses OpenAI to control a Solana wallet:
-+ Unmodified OpenAI lib
-+ (Mostly) Unmodified Solana lib
-+ Hit /api/joke?message=your best joke&addr=abc123
-+ OAI is asked "You are to decide if a joke is funny or not"
-+ If so 0.001 SOL is sent to addr
+1. exports a synchronous function.
+2. the synchronous function starts deferred work (fetch).
 
-## Why
-[Lock.host-node](https://github.com/rhodey/lock.host-node) demonstrates the same features but is expensive to host
+Two branches have been prepared:
 
-[Lock.host-python](https://github.com/rhodey/lock.host-python) also demonstrates the same features and is expensive to host
-
-It is very efficient to host WASM apps and so Lock.host has started in this direction
-
-## Setup
-Install [just](https://github.com/casey/just) then [wasmtime](https://github.com/bytecodealliance/wasmtime):
-```
-apt install just (or brew install just)
-curl https://wasmtime.dev/install.sh -sSf | bash
-```
+1. [less-code-await](https://github.com/rhodey/lock.host-wasm-rust/tree/less-code-await) await is used and tests pass.
+2. [less-code-poll](https://github.com/rhodey/lock.host-wasm-rust/tree/less-code-poll) a polling mechanism is used and tests hang.
 
 ## Run
-+ [http://localhost:8080](http://localhost:8080)
-+ [app wallet](https://explorer.solana.com/address/DohcaGiBiC3yuPz4gHtoA7QJhyL5N7hk3EpnfFyHZR2S?cluster=devnet)
-+ [user wallet](https://explorer.solana.com/address/CFf6SMjR3eNKR7me9CGHhRNE1SwSQaPi5r4MWZQFGB2W?cluster=devnet)
 ```
 just build
-cp example.env .env
 just run
-just joke 'why did the worker quit his job at the recycling factory? because it was soda pressing.'
-> {"signature":"25ndS3qg8EsiaN1uEBfpb63QNdWZDma8ap5Cc5Hv3P4nBM4kAd3pLJQiZHFGpYSm9HLcrzkQaz1mvDrw4Yy4Hu4X","from":"DohcaGiBiC3yuPz4gHtoA7QJhyL5N7hk3EpnfFyHZR2S","to":"CFf6SMjR3eNKR7me9CGHhRNE1SwSQaPi5r4MWZQFGB2W","thoughts":"The pun on 'soda pressing' is clever and plays with words, making it light-hearted and humorous."}
 ```
 
-## How
-WASM WASI 0.2 allows [all these interfaces](https://github.com/yoshuawuyts/awesome-wasm-components?tab=readme-ov-file#interfaces) and more
+## Or ...
+```
+npm --prefix helpers install
+npm --prefix helpers run build
+cargo build --release
+wac plug \
+  target/wasm32-wasip2/release/lock_host_wasm_rust.wasm \
+  --plug helpers/dist/bundle.wasm \
+  -o target/wasm32-wasip2/release/total.wasm
+wasmtime serve -Scli -Shttp target/wasm32-wasip2/release/total.wasm
+```
 
-Rust [.cargo/config.toml](.cargo/config.toml) applies `target = "wasm32-wasip2"` and many crates just work
+## Test
+The first and second tests pass on both branches.
 
-Expect to see SQLite show up in here soon
+The 3rd and 4th tests only complete on `less-code-await`.
+```
+curl -v 'http://localhost:8080/wait'
+>> 200
 
-## Performance
-1. npx loadtest -n 10000 http://localhost:8080 == 11338 RPS
-2. npx loadtest -n 10000 -k http://localhost:8080 == 15385 RPS
+curl -v 'http://localhost:8080/echo-headers'
+>> 200
+
+curl -v 'http://localhost:8080/api/chat-completion?apiKey=just-leave-this-here&message=telljoke'
+>> {"error":"HTTP 401"} (proves fetch is working)
+
+curl -v 'http://localhost:8080/api/chat-completion?apiKey=real-api-key&message=telljoke'
+>> { real: "json" } (valid api key not necessarily needed to debug this)
+```
+
+## Notes
+On other branches I have made attempts to use wasi io input-stream as a return type and these branches build but they get nasty stack traces when you hit the HTTP api which is trying to read from them. I have seen this deferred fetch issue show up with older versions of dependencies also but I have updated componentize-js, wit-bindgen, wit-bindgen-rt, and wstd all to latest versions to debug this.
 
 ## License
-hello@lock.host
+mike@rhodey.org
 
 MIT
