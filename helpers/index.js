@@ -1,5 +1,6 @@
 // import OpenAI from 'openai'
 
+// works
 async function fetchNative(url, apiKey, body) {
   const headers = { authorization: `Bearer ${apiKey}`, 'content-type': 'application/json' }
   console.log('!! fetch', url)
@@ -10,6 +11,7 @@ async function fetchNative(url, apiKey, body) {
   return reply.text()
 }
 
+// works
 async function chatCompletion(apiKey, json) {
   try {
     const url = 'https://api.openai.com/v1/chat/completions'
