@@ -1,0 +1,18 @@
+{
+  "name": "helpers",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "bundle": "rollup -c",
+    "build": "npm run bundle && componentize-js dist/bundle.js --wit ../wit --world-name helpers --disable fetch-event -o dist/bundle.wasm"
+  },
+  "devDependencies": {
+    "@bytecodealliance/componentize-js": "^0.19.3",
+    "@rollup/plugin-node-resolve": "^16.0.3",
+    "@rollup/plugin-replace": "^6.0.3",
+    "rollup": "^4.59.0"
+  },
+  "dependencies": {
+    "openai": "^6.22.0"
+  }
+}

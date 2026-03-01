@@ -1,0 +1,13 @@
+package local:app;
+
+interface helpers-interface {
+  chat-completion: func(api-key: string, json: string) -> string;
+}
+
+world helpers {
+  export helpers-interface;
+}
+
+world app {
+  import helpers-interface;
+}
