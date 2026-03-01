@@ -1,4 +1,4 @@
-# Lock.host-wasm-rust (!!debug)
+# ComponentizeJS-debug
 ComponentizeJS is failing when:
 
 1. exports a synchronous function.
@@ -6,8 +6,10 @@ ComponentizeJS is failing when:
 
 Two branches have been prepared:
 
-1. [less-code-await](https://github.com/rhodey/lock.host-wasm-rust/tree/less-code-await) await is used and tests pass.
-2. [less-code-poll](https://github.com/rhodey/lock.host-wasm-rust/tree/less-code-poll) a polling mechanism is used and tests hang.
+1. [main](https://github.com/rhodey/componentizejs-debug/tree/main) await is used and tests pass.
+2. [poll](https://github.com/rhodey/componentizejs-debug/tree/poll) a polling mechanism is used and tests hang.
+
+Look at [helpers/index.js](helpers/index.js) in both branches then [src/lib.rs](src/lib.rs) also.
 
 ## Run
 ```
@@ -28,9 +30,9 @@ wasmtime serve -Scli -Shttp target/wasm32-wasip2/release/total.wasm
 ```
 
 ## Test
-The first and second tests pass on both branches.
+The 1st and 2nd tests pass on both branches.
 
-The 3rd and 4th tests only complete on `less-code-await`.
+The 3rd and 4th tests only complete on `main`.
 ```
 curl -v 'http://localhost:8080/wait'
 >> 200
@@ -42,11 +44,13 @@ curl -v 'http://localhost:8080/api/chat-completion?apiKey=just-leave-this-here&m
 >> {"error":"HTTP 401"} (proves fetch is working)
 
 curl -v 'http://localhost:8080/api/chat-completion?apiKey=real-api-key&message=telljoke'
->> { real: "json" } (valid api key not necessarily needed to debug this)
+>> { real: "json" } (valid api key not needed to debug this)
 ```
 
 ## Notes
-On other branches I have made attempts to use wasi io input-stream as a return type and these branches build but they get nasty stack traces when you hit the HTTP api which is trying to read from them. I have seen this deferred fetch issue show up with older versions of dependencies also but I have updated componentize-js, wit-bindgen, wit-bindgen-rt, and wstd all to latest versions to debug this.
+I have made attempts to use wasi io input-stream as a return type and these build but they get nasty stack traces when you hit the HTTP api which is trying to read from them. I have seen the deferred fetch issue show up with older versions of dependencies also but I have updated `componentize-js`, `wit-bindgen`, `wit-bindgen-rt`, and `wstd` all to latest versions to debug this.
+
+I understand with this example repo the fetch could all be done in Rust and with no JS exported but my real use case involves more things needed, including deferred fetch from JS exports working.
 
 ## License
 mike@rhodey.org
