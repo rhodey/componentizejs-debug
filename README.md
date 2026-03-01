@@ -9,7 +9,7 @@ Two branches have been prepared:
 1. [main](https://github.com/rhodey/componentizejs-debug/tree/main) await is used and tests pass.
 2. [poll](https://github.com/rhodey/componentizejs-debug/tree/poll) a polling mechanism is used and tests hang.
 
-Look at [helpers/index.js](helpers/index.js) in both branches.
+Look at [helpers/index.js](helpers/index.js) in both branches then [src/lib.rs](src/lib.rs) also.
 
 ## Run
 ```
